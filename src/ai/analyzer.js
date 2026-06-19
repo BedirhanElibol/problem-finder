@@ -35,7 +35,7 @@ Göreyin sadece şikayetleri listelemek DEĞİLDİR. Görevin, aşağıdaki krit
 **KRİTİK KURALLAR:**
 - Raporun TAMAMI (tüm başlıklar, tablo kolonları, kriter isimleri, analiz detayları, açıklamalar, notlar vb.) tamamen anlaşılır ve akıcı bir **TÜRKÇE** ile yazılmalıdır. Kesinlikle İngilizce başlık, açıklama veya yarı İngilizce / yarı Türkçe ifadeler bırakılmamalıdır.
 - Her bölüm, verinin hangi platformdan, hangi alt forumdan (subreddit/konu) ve hangi arama sorgusundan geldiğini gösteren KAYNAK meta veri etiketini (Source/Kaynak) içermelidir.
-- Fırsatlar ve fikirler **B2B** (Business to Business) ağırlıklı olmalıdır (Yaklaşık %75 B2B ve %25 B2C/B2Prosumer oranında) ve TrustMRR üzerindeki başarılı girişimler gibi **Yaratıcı Ekonomisi, Turizm, Rezervasyon/Etkinlik Yönetimi, Tasarım/Medya veya E-ticaret/Yerel Hizmet** alanlarına odaklanmalıdır.
+- Fırsatlar ve fikirler **B2B** (Business to Business) ağırlıklı olmalıdır (Yaklaşık %75 B2B ve %25 B2C/B2Prosumer oranında) ve TrustMRR üzerindeki başarılı ve kârlı girişimler gibi **E-commerce, Content Creation, Marketing, Analytics, Education veya Sales** alanlarına odaklanmalıdır.
 - **YAZILIMCI/DEVOPS VE ALTYAPI ARAÇLARINA KESİNLİKLE YER VERME (YASAK VE VETO):**
   - CLI veritabanı yedekleme araçları, sunucu izleme/cron-job log monitörleri, SSL/DNS izleme, Git/PR şema denetleme araçları gibi tamamen yazılımcıları ve sistem yöneticilerini hedefleyen "derin teknik" DevOps altyapı fikirleri **kesinlikle yasaktır ve elenecektir**. Bu araçların pazar hacmi dar olup TrustMRR gerçekleriyle (Stan, Gumroad, Jungle Bee, Avenue Ticketing) uyuşmamaktadır.
 - **YAPAY ZEKA FİKİRLERİNE (AI/LLM/GPT/CHATBOT/CO-PILOT) KESİNLİKLE YER VERME (YASAK VE VETO):**
@@ -45,7 +45,7 @@ Göreyin sadece şikayetleri listelemek DEĞİLDİR. Görevin, aşağıdaki krit
   - Fikirlerin başlıklarında, özelliklerinde ve pazarlama modellerinde "AI", "Yapay Zeka", "GPT", "LLM", "Chatbot" kelimeleri kesinlikle geçmemelidir.
 - Her fırsatın ve fikrin başlığında açıkça **[B2B]** veya **[B2C]** etiketi yer almalıdır.
 - Fikirlerin pazar başarısı için **nasıl, nerede ve hangi kanallarla pazarlanması gerektiği** (Soğuk E-posta, LinkedIn Sosyal Satış, Product Hunt Lansmanı, Dizin Listelemeleri, Yan Proje Pazarlaması vb.) başarılı benzer örnekler referans gösterilerek detaylandırılmalıdır.
-- Acımasızca dürüst ol. Eğer bir fırsat zayıfsa, bunu açıkça belirt. Her şeyi gerçekçi puanlarla değerlendir.
+- **Acımasızca dürüst ol ve çok seçici davran:** Eğer bir fırsat zayıfsa, pazar doymuşsa veya insanların bunun için para ödemeyeceği (willingness to pay) açıksa, bunu çok net bir şekilde eleştir ve gerekirse listeden çıkar. Sadece gerçekçi, para kazandırma potansiyeli yüksek fikirlere yer ver. "Bu çok güzel bir fikir" demek yerine, "Müşteri edinme maliyeti (CAC) yüksek, kimse buna aylık $10'dan fazla vermez" gibi net ve gerçekçi TrustMRR verilerine (MRR, Multiple, vs.) dayalı finansal eleştiriler yap.
 
 ${previousReportText ? `
 **ÖNEMLİ KISIT (ÖNCEKİ RAPORLARDA VERİLEN FİKİRLER):**

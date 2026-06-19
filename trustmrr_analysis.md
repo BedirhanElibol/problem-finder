@@ -176,19 +176,22 @@ TrustMRR veritabanındaki **en yüksek gelire sahip ilk 100 startup** üzerinde 
 > [!NOTE]
 > *Gumroad ($7.1M MRR) ve Stan ($2.8M MRR) gibi dev platformlar B2B/B2Prosumer kategorisini ve ortalama gelirleri yukarı yönlü domine etmektedir.*
 
-### 🎯 En Popüler ve Kazançlı 10 Niş (Niches)
+### 🎯 En Popüler ve Kazançlı Kategoriler (Güncel Veri Analizi)
 
-| Sıra | Niş (Niche) | Girişim Sayısı | Açıklama |
-|------|-------------|----------------|----------|
-| 1 | **Other** | 40 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 2 | **Marketing** | 23 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 3 | **Developer Tools** | 9 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 4 | **Productivity** | 9 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 5 | **Health** | 6 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 6 | **Creator Economy** | 5 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 7 | **E-commerce** | 3 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 8 | **Design** | 3 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
-| 9 | **Finance** | 2 | Bu kategorideki projeler genellikle verimlilik ve gelir odaklıdır. |
+TrustMRR üzerindeki 5,000+ girişimin gerçek gelir verilerine göre en yüksek ortalama gelir elde eden ve en çok büyüyen kategoriler aşağıdadır. Bu kategoriler doğrudan problem çözme ve para kazanma potansiyeli en yüksek alanlardır:
+
+| Sıra | Kategori | Toplam Kategori Geliri | Ortalama Aylık Gelir (MRR) | Ortalama Büyüme (30 Gün) | Analiz ve Fırsat Açıklaması |
+|------|----------|------------------------|----------------------------|--------------------------|-----------------------------|
+| 🥇 | **E-commerce** | $616.6K | $2,754 | %19 | E-ticaret platformlarındaki (Shopify, WooCommerce) mağaza sahiplerinin satışlarını artıracak, iadeleri azaltacak veya kargo süreçlerini optimize edecek B2B operasyonel araçlar. |
+| 🥈 | **Content Creation** | $313.8K | $14,220 | %32 | İçerik üreticileri (Youtuber, Tiktoker, Bülten yazarları) için zaman kazandıran, sponsorluk süreçlerini yöneten veya dijital ürün (PDF, rehber) satışını kolaylaştıran B2Prosumer araçlar. |
+| 🥉 | **Marketing** | $154.8K | $1,881 | %158 | Ajanslar ve B2B şirketler için reklam yönetimi, organik trafik (SEO, sosyal medya kancaları) artırıcı araçlar, marka bilinirliği asistanları. Büyüme hızı en yüksek kategoridir. |
+| 4 | **Analytics** | $131.0K | $3,048 | %17 | İşletmeler için karmaşık verileri (ör. Google Analytics 4, Stripe verileri) basitleştiren, doğrudan actionable (aksiyon alınabilir) içgörüler sunan yalın metrik dashboardları. |
+| 5 | **Education** | $79.2K | $2,689 | %4 | Bağımsız eğitimcilerin kendi kurslarını satabileceği, komisyonsuz veya abonelik tabanlı öğrenim yönetim mini-sistemleri (LMS) ve öğrenci takip portalları. |
+| 6 | **SaaS** | $58.3K | $1,946 | %50 | Genel B2B yazılımları. İşletmelerin faturalandırma, IK yönetimi, proje yönetimi gibi spesifik bir departmanının sorununu çözen dikey ve geleneksel yazılımlar. |
+| 7 | **Sales** | $50.6K | $2,101 | %5 | Soğuk e-posta (cold email) otomasyonları, LinkedIn prospect bulma araçları, satış CRM'leri. Doğrudan para kazandırdığı için müşterilerin en kolay para ödediği alandır. |
+| 8 | **Social Media** | $47.0K | $3,470 | %20 | LinkedIn, X (Twitter) veya Instagram için gönderi zamanlama, carousel (kaydırmalı görsel) tasarlama veya viral şablon arşivleri sunan araçlar. |
+| 9 | **Customer Support** | $45.7K | $2,066 | %1 | Müşteri destek bilet (ticket) yönetimi, paylaşımlı WhatsApp/E-posta gelen kutuları, Sıkça Sorulan Sorular (FAQ) widget'ları. |
+| 10 | **Entertainment** | $38.8K | $2,603 | %49 | Etkinlik biletleme, dijital çekiliş araçları veya oyunlaştırma (gamification) ile kullanıcı etkileşimini artıran B2C odaklı niş projeler. |
 
 ---
 
