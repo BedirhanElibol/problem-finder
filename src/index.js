@@ -162,12 +162,14 @@ async function main() {
         console.warn("[Uyarı] Önceki raporlar okunurken hata:", err.message);
     }
     
-    // Her çalıştırmada farklı nişlere odaklanıp yeni fikirler bulması için rastgele bir B2B odak alanı seçelim
+    // Her çalıştırmada farklı nişlere odaklanıp yeni fikirler bulması için rastgele bir B2B odak alanı seçelim.
+    // TrustMRR en karlı kategorilerine (E-commerce, Content Creation, Marketing, Analytics, Education) dayalıdır.
     const focusAreas = [
-        "Yaratıcı Ekonomisi ve Dijital Ürün Satış Çözümleri (Link-in-bio sponsorluk yönetim araçları, dijital ürün teslimat widget'ları, yaratıcılar için özel abonelik kutuları)",
-        "Turizm, Rezervasyon ve Etkinlikler (Yerel tekne/tur operatörleri için komisyonsuz Stripe biletleme motorları, düğün ve etkinlikler için QR kodlu fotoğraf toplama panelleri)",
-        "Sosyal Medya, Tasarım ve İçerik Üretici Araçları (Sosyal medya için metinden görsel şablonu/carousel oluşturan araçlar, hızlı video/ses editörleri)",
-        "E-ticaret ve Yerel Hizmetler (Butik e-ticaret siteleri için kargo/iade takip asistanları, temizlikçi/tesisatçı siteleri için dinamik fiyat hesaplayan rezervasyon formları)"
+        "E-commerce Operasyonları (Shopify/WooCommerce iade süreçlerini otomatikleştiren, kargo takibini basitleştiren B2B mikro-SaaS araçları)",
+        "Content Creation ve Prosumer Araçları (Youtuber, Tiktoker veya bülten yazarlarının sponsorluk yönetimini kolaylaştıran, PDF/dijital ürün satış widget'ları)",
+        "Marketing ve Satış (B2B şirketler için reklam metriklerini basitleştiren, soğuk e-posta (cold email) gönderimini veya LinkedIn prospect yönetimini sağlayan araçlar)",
+        "Analytics Dashboard'ları (Karmaşık Google Analytics veya Stripe verilerini işletmeler için tek bir ekranda basitleştiren yalın analitik araçları)",
+        "Education ve LMS (Bağımsız eğitimcilerin komisyonsuz olarak kendi kurslarını, aboneliklerini ve öğrenci takiplerini yönetebileceği araçlar)"
     ];
     const randomFocus = focusAreas[Math.floor(Math.random() * focusAreas.length)];
     console.log(`🎯 Bugünün B2B SaaS Analiz Odağı: ${randomFocus}\n`);
