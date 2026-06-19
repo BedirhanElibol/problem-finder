@@ -1,0 +1,18 @@
+[
+  "[B2B] Paylaşımlı Gelen Kutusu (Shared Inbox) İçin Uygun Fiyatlı API Proxy",
+  "[B2B] Veritabanı ve API Şeması Doğrulayıcı (Schema Guard)",
+  "CronPulse (Cron-Job İzleme ve İyileştirme Servisi)",
+  "FormatBridge (API Proxy Veri Dönüştürücü)",
+  "[B2B] Çoklu Sunucu Cron-Job \"Dead Man's Switch\" İzleme Servisi",
+  "[B2B] Stripe Webhook Kurtarma ve Yeniden Deneme Paneli",
+  "[B2B] CookielessAnalytics (Cloudflare Log Analizcisi)",
+  "[B2B] TenantShield (SQL Sorgu İzleyici)",
+  "[B2B] Dinamik Çerez Uyumluluk İzleyici ve Slack Bildirim Servisi",
+  "[B2B] Yerel Medya Optimizasyon ve Bulut Senkronizasyon CLI'ı",
+  "[B2B] CloudLog-Stat (JS-Free Log Analizcisi)",
+  "[B2B] DomainHealth-Alert (DNS İzleme Ağı)",
+  "[B2B] Yerel Tur ve Etkinlik Operatörleri İçin Mobil Check-in Paneli",
+  "[B2B] WhatsApp Rezervasyon ve Ödeme Otomasyonu",
+  "[B2B] SponsorSlot (Link-in-Bio Sponsorluk Widget'ı)",
+  "[B2C/Pro] TestiWalls (Dinamik Testimonial Duvarı)"
+]

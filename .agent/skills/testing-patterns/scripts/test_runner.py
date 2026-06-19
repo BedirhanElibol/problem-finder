@@ -45,23 +45,23 @@ def detect_test_framework(project_path: Path) -> dict:
             # Check for test script
             if "test" in scripts:
                 result["framework"] = "npm test"
-                result["cmd"] = ["npm", "test"]
+                result["cmd"] = ["npm.cmd" if sys.platform == "win32" else "npm", "test"]
                 
                 # Try to detect specific framework for coverage
                 if "vitest" in deps:
                     result["framework"] = "vitest"
-                    result["coverage_cmd"] = ["npx", "vitest", "run", "--coverage"]
+                    result["coverage_cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "vitest", "run", "--coverage"]
                 elif "jest" in deps:
                     result["framework"] = "jest"
-                    result["coverage_cmd"] = ["npx", "jest", "--coverage"]
+                    result["coverage_cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "jest", "--coverage"]
             elif "vitest" in deps:
                 result["framework"] = "vitest"
-                result["cmd"] = ["npx", "vitest", "run"]
-                result["coverage_cmd"] = ["npx", "vitest", "run", "--coverage"]
+                result["cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "vitest", "run"]
+                result["coverage_cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "vitest", "run", "--coverage"]
             elif "jest" in deps:
                 result["framework"] = "jest"
-                result["cmd"] = ["npx", "jest"]
-                result["coverage_cmd"] = ["npx", "jest", "--coverage"]
+                result["cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "jest"]
+                result["coverage_cmd"] = ["npx.cmd" if sys.platform == "win32" else "npx", "jest", "--coverage"]
                 
         except:
             pass
