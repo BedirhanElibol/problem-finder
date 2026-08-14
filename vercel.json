@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "kinderlog-carelog-saas",
+  "builds": [
+    {
+      "src": "src/components/landing-page.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/src/components/landing-page.html"
+    }
+  ]
+}

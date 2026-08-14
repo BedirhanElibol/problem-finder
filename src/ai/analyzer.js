@@ -10,9 +10,9 @@ async function analyzeComplaints(dataText, previousReportText = "", focusArea = 
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.5-flash",
         generationConfig: {
-            temperature: 0.85
+            temperature: 0.9
         }
     });
 
@@ -21,52 +21,174 @@ async function analyzeComplaints(dataText, previousReportText = "", focusArea = 
     const localTime = new Date(localDate.getTime() - (tzOffset * 60 * 1000));
     const today = localTime.toISOString().split('T')[0];
 
+    // Konsept grubu bazlı yasaklama listesi oluştur
+    const bannedConceptGroups = [];
+    if (ideaHistory && ideaHistory.length > 0) {
+        // Konsept gruplarını otomatik oluştur
+        const conceptMap = {};
+        for (const idea of ideaHistory) {
+            const lower = idea.toLowerCase();
+            if (lower.includes('rezervasyon') || lower.includes('booking') || lower.includes('randevu')) {
+                conceptMap['Rezervasyon/Booking Widget'] = (conceptMap['Rezervasyon/Booking Widget'] || 0) + 1;
+            }
+            if (lower.includes('kargo') || lower.includes('takip') || lower.includes('shipping')) {
+                conceptMap['Kargo Takip/İade Portal'] = (conceptMap['Kargo Takip/İade Portal'] || 0) + 1;
+            }
+            if (lower.includes('sponsorluk') || lower.includes('sponsorship') || lower.includes('sponsor')) {
+                conceptMap['Sponsorluk Yönetim'] = (conceptMap['Sponsorluk Yönetim'] || 0) + 1;
+            }
+            if (lower.includes('qr') || lower.includes('fotoğraf') || lower.includes('photo')) {
+                conceptMap['QR Fotoğraf Toplama'] = (conceptMap['QR Fotoğraf Toplama'] || 0) + 1;
+            }
+            if (lower.includes('dijital ürün') || lower.includes('digital') || lower.includes('paywall') || lower.includes('pdf')) {
+                conceptMap['Dijital Ürün Satış/Teslimat'] = (conceptMap['Dijital Ürün Satış/Teslimat'] || 0) + 1;
+            }
+            if (lower.includes('testimonial') || lower.includes('kanıt') || lower.includes('proof')) {
+                conceptMap['Testimonial/Sosyal Kanıt Duvarı'] = (conceptMap['Testimonial/Sosyal Kanıt Duvarı'] || 0) + 1;
+            }
+            if (lower.includes('carousel') || lower.includes('sosyal medya') || lower.includes('slide')) {
+                conceptMap['Sosyal Medya Carousel/Şablon'] = (conceptMap['Sosyal Medya Carousel/Şablon'] || 0) + 1;
+            }
+            if (lower.includes('fiyat hesap') || lower.includes('estimat') || lower.includes('dinamik fiyat')) {
+                conceptMap['Dinamik Fiyat Hesaplama'] = (conceptMap['Dinamik Fiyat Hesaplama'] || 0) + 1;
+            }
+            if (lower.includes('biletleme') || lower.includes('ticket') || lower.includes('check-in')) {
+                conceptMap['Biletleme/Check-in'] = (conceptMap['Biletleme/Check-in'] || 0) + 1;
+            }
+            if (lower.includes('evcil') || lower.includes('pet') || lower.includes('hayvan')) {
+                conceptMap['Evcil Hayvan Takip'] = (conceptMap['Evcil Hayvan Takip'] || 0) + 1;
+            }
+            if (lower.includes('whatsapp')) {
+                conceptMap['WhatsApp Otomasyon'] = (conceptMap['WhatsApp Otomasyon'] || 0) + 1;
+            }
+            if (lower.includes('mutfak') || lower.includes('kitchen') || lower.includes('sipariş yönetim')) {
+                conceptMap['Mutfak/Sipariş Ekranı'] = (conceptMap['Mutfak/Sipariş Ekranı'] || 0) + 1;
+            }
+            if (lower.includes('paketleme') || lower.includes('pack')) {
+                conceptMap['Paketleme/Fulfillment'] = (conceptMap['Paketleme/Fulfillment'] || 0) + 1;
+            }
+            // E-ticaret İade/Kargo
+            if (lower.includes('iade') || lower.includes('return') || lower.includes('envanter sync')) {
+                conceptMap['E-ticaret İade/Envanter'] = (conceptMap['E-ticaret İade/Envanter'] || 0) + 1;
+            }
+            // CRM/Pipeline
+            if (lower.includes('crm') || lower.includes('pipeline') || lower.includes('lead scor')) {
+                conceptMap['CRM/Pipeline'] = (conceptMap['CRM/Pipeline'] || 0) + 1;
+            }
+            // SEO/Marketing
+            if (lower.includes('seo') || lower.includes('backlink') || lower.includes('keyword track')) {
+                conceptMap['SEO/Backlink Aracı'] = (conceptMap['SEO/Backlink Aracı'] || 0) + 1;
+            }
+            // Analytics Dashboard
+            if (lower.includes('analytics') || lower.includes('analitik') || lower.includes('mrr dashboard')) {
+                conceptMap['Analytics Dashboard'] = (conceptMap['Analytics Dashboard'] || 0) + 1;
+            }
+            // Creator/Newsletter
+            if (lower.includes('newsletter') || lower.includes('bülten') || lower.includes('creator crm')) {
+                conceptMap['Creator/Newsletter Aracı'] = (conceptMap['Creator/Newsletter Aracı'] || 0) + 1;
+            }
+            // Shared Inbox / Helpdesk
+            if (lower.includes('shared inbox') || lower.includes('helpdesk') || lower.includes('ticket yönetim')) {
+                conceptMap['Helpdesk/Shared Inbox'] = (conceptMap['Helpdesk/Shared Inbox'] || 0) + 1;
+            }
+            // HR/ATS
+            if (lower.includes('ats') || lower.includes('onboarding') || lower.includes('işe alım')) {
+                conceptMap['HR/ATS Aracı'] = (conceptMap['HR/ATS Aracı'] || 0) + 1;
+            }
+        }
+        // 2+ kez tekrarlanan konseptleri yasakla
+        for (const [concept, count] of Object.entries(conceptMap)) {
+            if (count >= 2) {
+                bannedConceptGroups.push(concept);
+            }
+        }
+    }
+
+    // TrustMRR doğrulanmış pazar istihbaratı
+    const trustmrrContext = `
+## TrustMRR VERİFİYE PAZAR İSTİHBARATI (Gerçek Gelir Verileri — trustmrr.com)
+
+Aşağıdaki veriler TrustMRR.com'daki 5,000+ doğrulanmış startup'tan (toplam $1.53B doğrulanmış gelir, 54M işlem) elde edilmiştir.
+Fırsat değerlendirmelerinde bu verileri REFERANS AL ve puanlamana yansıt:
+
+### Kategori Bazlı Ortalama MRR ve Büyüme (Doğrulanmış)
+| Kategori | Ort. MRR | Büyüme (30g) | Yorum |
+|----------|----------|-------------|-------|
+| Content Creation | $14,220 | %32 | EN YÜKSEK ortalama MRR |
+| Social Media | $3,470 | %20 | Yüksek değer, düşük churn |
+| Analytics | $3,048 | %17 | Veri-odaklı, yapışkan |
+| E-commerce | $2,754 | %19 | En büyük toplam hacim ($616K) |
+| Entertainment | $2,603 | %49 | Hızlı büyüme |
+| Sales | $2,101 | %5 | Müşteriler en kolay para ödediği alan |
+| Customer Support | $2,066 | %1 | Olgun, stabil pazar |
+| SaaS (genel) | $1,946 | %50 | Hızlı büyüme |
+| Marketing | $1,881 | %158 | EN HIZLI büyüyen kategori |
+
+### Pazar Gerçekleri
+- Startup'ların %67.6'sı ayda $1K bile kazanamıyor → doğru problemi bulmak kritik
+- En çok para kazanan projelerin %76'sı yapay zekasız, geleneksel araçlar
+- B2B/B2Prosumer modeller toplam gelirin %82'sini oluşturuyor
+- Stripe pazar payı %59.3 → ödeme entegrasyonunda Stripe-first düşün
+- Marketing %158 büyüyor → bu alandaki fırsatları yüksek öncelikli değerlendir
+- Shopify kullanıcılarının %16'sı $1M+ gelire ulaşmış → e-ticaret araçları skalalar
+
+### Fırsat Değerlendirme Kuralı
+Bir fırsat değerlendirirken, yukarıdaki TrustMRR kategorilerinden birine denk düşüyorsa bu veriyi GENEL SKOR hesaplamasında kullan. Yüksek MRR ve büyüme gösteren kategorilerdeki fırsatlara bonus puan ver.
+`;
+
     const prompt = `
-Sen kıdemli bir **SaaS pazar analisti ve ürün stratejistisin**. Hem bir yatırımcı hem de bir yazılımcı (builder) gibi düşünüyorsun.
-Aşağıda Reddit, Hacker News ve Product Hunt'tan toplanmış gerçek kullanıcı şikayetleri ve tartışma verileri yer almaktadır.
+Sen bir **para kazandıran SaaS stratejistisin**. Hem bir yatırımcı gibi fırsatları değerlendiriyor, hem de bir yazılımcı (builder) gibi "bunu gerçekten inşa edip satabilir miyim?" diye düşünüyorsun.
 
-Göreyin sadece şikayetleri listelemek DEĞİLDİR. Görevin, aşağıdaki kriterleri analiz ederek **doğrulanmış ve inşa edilebilir (buildable) SaaS fırsatlarını** bulmaktır:
-- İnsanların karşılaştığı spesifik ve tekrarlayan sorunlar neler?
-- İnsanlar bu sorunu çözmek için ÖDEME YAPAR MI? (Ödeme istekliliği)
-- Potansiyel pazar ne kadar büyük?
-- Mevcut çözümler neler ve nerede yetersiz kalıyorlar?
-- Tek bir geliştirici (solo developer) veya küçük bir ekip modern araçlarla (Next.js, Supabase, Stripe, Yapay Zeka API'leri) bunu inşa edebilir mi?
+${trustmrrContext}
 
-**KRİTİK KURALLAR:**
-- Raporun TAMAMI (tüm başlıklar, tablo kolonları, kriter isimleri, analiz detayları, açıklamalar, notlar vb.) tamamen anlaşılır ve akıcı bir **TÜRKÇE** ile yazılmalıdır. Kesinlikle İngilizce başlık, açıklama veya yarı İngilizce / yarı Türkçe ifadeler bırakılmamalıdır.
-- Her bölüm, verinin hangi platformdan, hangi alt forumdan (subreddit/konu) ve hangi arama sorgusundan geldiğini gösteren KAYNAK meta veri etiketini (Source/Kaynak) içermelidir.
-- Fırsatlar ve fikirler **B2B** (Business to Business) ağırlıklı olmalıdır (Yaklaşık %75 B2B ve %25 B2C/B2Prosumer oranında) ve TrustMRR üzerindeki başarılı girişimler gibi **Yaratıcı Ekonomisi, Turizm, Rezervasyon/Etkinlik Yönetimi, Tasarım/Medya veya E-ticaret/Yerel Hizmet** alanlarına odaklanmalıdır.
-- **YAZILIMCI/DEVOPS VE ALTYAPI ARAÇLARINA KESİNLİKLE YER VERME (YASAK VE VETO):**
-  - CLI veritabanı yedekleme araçları, sunucu izleme/cron-job log monitörleri, SSL/DNS izleme, Git/PR şema denetleme araçları gibi tamamen yazılımcıları ve sistem yöneticilerini hedefleyen "derin teknik" DevOps altyapı fikirleri **kesinlikle yasaktır ve elenecektir**. Bu araçların pazar hacmi dar olup TrustMRR gerçekleriyle (Stan, Gumroad, Jungle Bee, Avenue Ticketing) uyuşmamaktadır.
-- **YAPAY ZEKA FİKİRLERİNE (AI/LLM/GPT/CHATBOT/CO-PILOT) KESİNLİKLE YER VERME (YASAK VE VETO):**
-  - Raporda sunulacak fırsatların ve mikro-SaaS fikirlerinin en az **%90'ı tamamen yapay zekasız (Non-AI), geleneksel işlevsel araçlar (Traditional Utilities & Workflow Automation)** olmak zorundadır.
-  - Temel işlevi "AI yardımıyla [X] yapmak", "AI chatbot", "LLM/GPU VM optimizasyonu", "AI SEO içeriği yazımı", "AI görsel üretimi" gibi yapay zekaya veya LLM API'lerine dayanan tüm fikirler **kesinlikle yasaktır ve elenecektir**.
-  - Sadece ve sadece yapay zekasız, düz kod/kod dışı mantık, rezervasyon formları, tak-çalıştır takvim widget'ları, QR kodlu veri toplama, e-ticaret kargo/iade asistanları, sosyal medya şablon ve görsel oluşturucuları gibi geleneksel işlevsel mikro-SaaS fikirleri üretilmelidir (Örnek: Düğünler için QR ile fotoğraf toplama aracı, yerel turlar için tak-çalıştır rezervasyon takvimi widget'ı, link-in-bio sponsorluk yönetim kutusu, yerel servis siteleri için dinamik rezervasyon formu).
-  - Fikirlerin başlıklarında, özelliklerinde ve pazarlama modellerinde "AI", "Yapay Zeka", "GPT", "LLM", "Chatbot" kelimeleri kesinlikle geçmemelidir.
+Aşağıda Reddit, Hacker News, Product Hunt ve X/Twitter'dan toplanmış **gerçek kullanıcı şikayetleri ve tartışma verileri** var.
+
+## SENİN GÖREVİN
+
+Basit "şu widget'ı yap" önerileri YAPMA. Bunun yerine şunları yap:
+
+1. **Gerçek acı noktalarını bul:** İnsanların gerçekten sinirlendiği, para kaybettiği veya saatlerini boşa harcadığı spesifik sorunları tespit et.
+2. **"Boring but profitable" (sıkıcı ama karlı) işlere odaklan:** Sexy olmak zorunda değil. Her gün kullanılan, müşterinin vazgeçemeyeceği, "sıkıcı" ama sürekli gelir getiren araçlar en karlı SaaS'lardır. Muhasebe, fatura, envanter, randevu, CRM gibi düz operasyonel sorunlar genellikle en iyi para kazandırır.
+3. **İlk 10 müşteriyi nasıl bulacağını açıkla:** Genel "Product Hunt'ta lansman yap" deme. Somut adımlar ver: "Google Maps'te 'diş kliniği' ara, ilk 50 sonuca soğuk e-posta at, demo teklif et."
+4. **Unit economics hesapla:** Her fırsat için CAC (müşteri edinme maliyeti), LTV (yaşam boyu değer), aylık break-even noktası ve kâr marjı tahmini ver.
+5. **"Quick Win" vs "Büyük Bahis" ayrımı yap:** Bazı fırsatlar 2 haftada MVP çıkarıp $500 kazandırır (Quick Win), bazıları 3 ayda $5K MRR'a ulaştırır (Büyük Bahis). İkisini de değerlendir.
+
+## KRİTİK KURALLAR
+
+- Raporun TAMAMI akıcı ve doğal **TÜRKÇE** ile yazılmalıdır.
 - Her fırsatın ve fikrin başlığında açıkça **[B2B]** veya **[B2C]** etiketi yer almalıdır.
-- Fikirlerin pazar başarısı için **nasıl, nerede ve hangi kanallarla pazarlanması gerektiği** (Soğuk E-posta, LinkedIn Sosyal Satış, Product Hunt Lansmanı, Dizin Listelemeleri, Yan Proje Pazarlaması vb.) başarılı benzer örnekler referans gösterilerek detaylandırılmalıdır.
-- Acımasızca dürüst ol. Eğer bir fırsat zayıfsa, bunu açıkça belirt. Her şeyi gerçekçi puanlarla değerlendir.
+- Fırsatlar **%75 B2B** ağırlıklı olmalıdır.
+- **DÜŞÜK SEVİYE DEVOPS/ALTYAPI ARAÇLARI YASAK:** CLI araçları, sunucu izleme, SSL/DNS takip, Git araçları, container yönetimi gibi sadece SRE/DevOps mühendislerine hitap eden altyapı araçları yasaktır. ANCAK: SaaS kurucuları, pazarlamacılar, satışçılar ve işletme sahipleri için olan yazılım araçları (CRM, analytics dashboard, SEO aracı, e-ticaret widget, faturalama, müşteri destek paneli vb.) İZİNLİDİR ve teşvik edilir.
+- **AI/LLM/GPT/CHATBOT FİKİRLERİ KESİNLİKLE YASAK:** Fikirlerin en az %90'ı yapay zekasız, geleneksel işlevsel araçlar olmalıdır.
+- Fırsatları hem fiziksel/yerel hizmet sektörlerinden hem de dijital/SaaS dünyasından dengeli bir şekilde sun. Sadece tek bir dünyaya odaklanma.
+- Acımasızca dürüst ol. Zayıf fırsatları açıkça belirt. Gerçekçi puanla.
+- Fırsatları farklı sektörlerden ve nişlerden seç. Aynı sektörden 2+ fırsat sunma.
+- Kaynak meta verisini (Platform, Subreddit, Sorgu) her fırsat ve fikirde belirt.
+
+${bannedConceptGroups.length > 0 ? `
+**YASAKLI KONSEPT GRUPLARI (Bu kategorilerdeki fikirler daha önce çok kez detaylandırıldı, KESİNLİKLE bu konseptlere ait fikirler üretme):**
+${bannedConceptGroups.map((g, i) => `${i + 1}. ❌ ${g}`).join('\n')}
+
+Bu konseptlerin hiçbirini farklı isimlerle, farklı açılardan veya farklı hedef kitlelerle yeniden paketleyerek sunma. Tamamen farklı sorunlara ve sektörlere odaklan.
+` : ''}
 
 ${previousReportText ? `
-**ÖNEMLİ KISIT (ÖNCEKİ RAPORLARDA VERİLEN FİKİRLER):**
-Aşağıdaki fırsatlar ve fikirler önceki günlerde zaten raporlanmıştır ve bu fikirlerin tekrar üretilmesi KESİNLİKLE YASAKTIR:
+**ÖNCEKİ RAPORLARDA VERİLEN FİKİRLER (TEKRAR ETME):**
+Aşağıdaki fırsatlar zaten raporlanmıştır. Bunları veya bunlara çok benzer konseptleri TEKRAR ETME:
 ------------------
-${previousReportText.substring(0, 120000)}
+${previousReportText.substring(0, 100000)}
 ------------------
-Lütfen yukarıdaki fikirleri ve fırsatları BİREBİR VEYA BENZER ŞEKİLDE TEKRAR ETME. Bu sorunlar yeni gelen veride olsa bile tamamen farklı pazar fırsatlarına odaklan veya bu sorunları tamamen farklı açılardan/başka nişler için çöz. Yeni raporda farklı, yenilikçi ve taze fırsatlar bulmamız çok önemlidir.
 ` : ''}
 
 ${ideaHistory && ideaHistory.length > 0 ? `
-**KESİNLİKLE YASAKLI FİKİRLER/BAŞLIKLAR (BU KONSEPTE SAHİP FİKİRLER DAHA ÖNCE DETAYLANDIRILDI, LÜTFEN BUNLARDAN FARKLI FİKİRLER ÜRET):**
+**DAHA ÖNCE ÜRETİLMİŞ FİKİRLER (BUNLARI TEKRAR ETME):**
 ${ideaHistory.map((item, idx) => `${idx + 1}. ${item}`).join('\n')}
-------------------
-Lütfen yukarıdaki listede yer alan fikirleri, başlıkları veya bunlara çok benzeyen çözümleri KESİNLİKLE tekrar sunma. Tamamen farklı sorunları ve çözümleri ele al.
 ` : ''}
 
 ${focusArea ? `
-**BUGÜNÜN ÖZEL ODAK ALANI (BU NİŞE ODAKLAN):**
-Bu raporda özellikle şu alandaki/nişteki fırsatları ve fikirleri bulmaya odaklan: **${focusArea}**.
-Bulacağın 3-4 fırsat ve fikir en azından ağırlıklı olarak bu alandaki geleneksel (Non-AI) sorunları çözmelidir. Bu, raporun her gün farklı ve taze fırsatları kapsamasını sağlar.
+**BUGÜNÜN ÖZEL ODAK ALANI:**
+Bu raporda özellikle şu alandaki fırsatları bulmaya odaklan: **${focusArea}**.
+Bu alandaki GERÇEK operasyonel sorunları, mevcut araçların neden yetersiz kaldığını ve insanların GERÇEKTEN ne kadar ödemeye hazır olduğunu derinlemesine analiz et.
 ` : ''}
 
 
@@ -74,95 +196,96 @@ Bulacağın 3-4 fırsat ve fikir en azından ağırlıklı olarak bu alandaki ge
 
 # 📊 Problem Bulucu ve Pazar Fırsatları Raporu
 **Tarih:** ${today}
-**Veri Kaynakları:** Reddit RSS, Hacker News Algolia API, Product Hunt
+**Veri Kaynakları:** Reddit RSS, Hacker News Algolia API, Product Hunt, X/Twitter
 
 ---
 
-## 1. 🏆 En İyi Pazar Fırsatları (Skora Göre Sıralı)
+## 1. 🏆 En İyi Pazar Fırsatları (Derinlemesine Analiz)
 
-Bulunan HER fırsat için aşağıdaki analiz kartını oluştur:
+Her fırsat için aşağıdaki **kapsamlı analiz kartını** oluştur:
 
 ### Fırsat #N: [B2B veya B2C] [Net Problem Başlığı]
 
 | Kriter | Skor | Analiz |
 |--------|------|--------|
-| 🎯 Problemin Netliği | ?/10 | Bu sorun ne kadar spesifik ve iyi tanımlanmış? |
-| 👥 Pazar Büyüklüğü | Küçük / Orta / Büyük | Bu sorundan etkilenen tahmini kişi sayısı |
-| 💰 Ödeme İstekliliği | Düşük / Orta / Yüksek | İnsanlar bir çözüm için ödeme yapmaya hazır görünüyor mu? |
-| 🏁 Rekabet | Yok / Düşük / Orta / Yüksek | Mevcut çözümler var mı? Ne kadar iyiler? |
-| 🔧 Teknik Fizibilite | Kolay / Orta / Zor | Küçük bir ekip bunu Next.js + Supabase ile kurabilir mi? |
-| 📈 Trend Yönü | Azalan / Sabit / Büyüyen | Bu sorun giderek büyüyor mu yoksa küçülüyor mu? |
-| ⭐ **GENEL SKOR** | **?/100** | Ağırlıklı toplam puan |
+| 🎯 Problemin Netliği | ?/10 | Sorun ne kadar spesifik? |
+| 👥 Pazar Büyüklüğü | Küçük / Orta / Büyük | Tahmini hedef kitle sayısı |
+| 💰 Ödeme İstekliliği | Düşük / Orta / Yüksek | Para ödeme kanıtı |
+| 🏁 Rekabet | Yok / Düşük / Orta / Yüksek | Mevcut çözümler ve eksikleri |
+| 🔧 Teknik Fizibilite | Kolay / Orta / Zor | Solo geliştirici yapabilir mi? |
+| 📈 Trend Yönü | Azalan / Sabit / Büyüyen | Pazar trendi |
+| ⭐ **GENEL SKOR** | **?/100** | Toplam puan |
 
-**Model Türü:** B2B veya B2C (Neden bu modele girdiğini kısa açıkla)
+**Sektör:** [Hangi sektöre hitap ediyor?]
+**Model Türü:** B2B veya B2C
 
-**Problem Açıklaması:**
-[Problemin detaylı Türkçe açıklaması]
+**Problem Açıklaması:** [Detaylı açıklama]
 
-**Neden Önemli (Fırsat Analizi):**
-[Birinin bunu neden inşa etmesi gerektiğine dair Türkçe analiz]
+**Neden Para Kazandırır (Unit Economics):**
+- **Hedef Fiyat:** $?/ay
+- **Tahmini CAC (Müşteri Edinme Maliyeti):** $? (hangi kanaldan?)
+- **Tahmini Churn:** %? aylık
+- **LTV (Yaşam Boyu Değer):** $?
+- **Break-even:** ? müşteri ile kâra geçilir
+- **100 müşteri senaryosu:** $?K MRR
 
-**Kaynak(lar):**
-[Kaynak: Platform | Subreddit/Konu: X | Sorgu: Y]
+**İlk 10 Müşteriyi Nasıl Bulursun? (Somut Adımlar):**
+1. [Spesifik kanal ve adım]
+2. [Spesifik kanal ve adım]
+3. [Spesifik kanal ve adım]
 
-**Mevcut Rakipler ve Eksik Yönleri:**
-[Bilinen rakiplerin listesi ve sundukları çözümlerdeki eksiklikler/boşluklar]
+**Mevcut Rakipler ve Boşluklar:**
+| Rakip | Fiyat | Zayıf Yönü |
+|-------|-------|------------|
+| ... | ... | ... |
+
+**Kaynak:** [Kaynak: Platform | Subreddit/Konu | Sorgu]
 
 ---
 
-Tüm fırsatları en yüksek GENEL SKOR'dan en düşüğe doğru sırala. En az 3-5 adet fırsat ekle.
+En az 3-4 fırsat üret ve GENEL SKOR'a göre sırala. Her fırsat FARKLI bir sektörden olmalı.
 
-## 2. 💡 İnşa Edilebilir Mikro-SaaS Fikirleri (Gelir ve Pazarlama Modeli ile)
+## 2. 💡 İnşa Edilebilir Mikro-SaaS Fikirleri
 
-Her fikir için şunları ekle:
+Her fikir için:
 
 ### Fikir #N: [B2B veya B2C] [Ürün Adı Önerisi]
 
-**İlham Kaynağı:** [Kaynak: Platform | Sorgu: X]
-
-**Tek Cümlelik Özet:** [Ürünün ne yaptığını açıklayan tek cümlelik Türkçe özet]
+**Tek Cümlelik Özet:** [Ne yapıyor?]
+**Sektör:** [Hangi sektör?]
+**Tür:** 🚀 Quick Win (2 hafta MVP) veya 🎯 Büyük Bahis (1-3 ay MVP)
 
 **Temel Özellikler:**
 - Özellik 1
 - Özellik 2
 - Özellik 3
 
-**Hedef Kitle:** [Buna tam olarak kim para öder?]
-
-**Önerilen Teknoloji Yığını:** Next.js + Supabase + [gereken spesifik API'ler/araçlar]
-**Gelir Modeli:** [Freemium / Abonelik / Tek Seferlik / Kullanım Bazlı] — [Önerilen fiyatlandırma, B2B için $49+, B2C için $9-29 aralığında olmalı]
-**Tahmini MVP Süresi:** [Solo bir geliştirici için yapay zeka araçlarıyla X hafta]
-**Gelir Potansiyeli:** [Pazar verilerine dayanan gerçekçi aylık gelir tahmini]
-
-**Pazarlama Stratejisi ve Dağıtım Kanalları:**
-- **Pazarlama Yöntemi:** [Hangi yöntemlerin kullanılacağı ve nasıl uygulanacağı]
-- **Benzer Başarı Hikayesi:** [Benzer hedeflere ulaşmış indie hacker'ların (örn. Marc Lou'nun Twitter lansmanı, soğuk e-postalarla müşteri edinme vb.) pazarlama taktiklerinden ilham alarak somut yönlendirme]
-- **Lansman Kanalları:** [Product Hunt, TrustMRR, Twitter/X, LinkedIn, Niş Dizinler vb.]
+**Gelir Modeli:** [Fiyat] — **Neden bu fiyat?** [Fiyat psikolojisi açıklaması]
+**30 Günlük Lansman Planı:**
+- Hafta 1: [Ne yapılacak?]
+- Hafta 2: [Ne yapılacak?]
+- Hafta 3: [Ne yapılacak?]
+- Hafta 4: [Ne yapılacak?]
 
 ---
 
 ## 3. 🗣️ Müşterinin Sesi (Doğrudan Kanıtlar)
 
-Her alıntı için şunları ekle:
-- Kesin kaynak etiketi: [Kaynak: Platform | Subreddit: X | Sorgu: Y]
-- Orijinal İngilizce yorum/şikayet metni ve altında Türkçe çevirisi
-- Bunun hangi fırsatı desteklediğine dair kısa bir not
+Her alıntı için kaynak ve hangi fırsatı desteklediğini belirt.
 
 ---
 
-## 4. ⚠️ Kaçınılması Gereken Anti-Pattern'ler ve Tuzaklar
+## 4. ⚠️ Kaçınılması Gereken Tuzaklar
 
-Şikayetlerden İYİ GİBİ GÖRÜNEN ama aslında KÖTÜ iş fırsatı (tuzak) olacak 2-3 fikri listele. Nedenini açıkla.
+İYİ GİBİ GÖRÜNEN ama aslında KÖTÜ iş fırsatı olan 2-3 fikri listele. Neden tuzak olduğunu açıkla.
 
 ---
 
 ## 5. 📋 Yönetici Özeti (TL;DR)
 
-Tüm fırsatları sıralayan nihai bir özet tablo:
-
-| Sıra | Fırsat | Skor | Model | Pazar | Rekabet | Geliştirme Süresi | Ana Pazarlama Kanalı | Karar |
-|------|--------|------|-------|-------|---------|-------------------|----------------------|-------|
-| 1 | ... | .../100 | B2B / B2C | ... | ... | ... | ... | 🟢 GO / 🟡 MAYBE / 🔴 SKIP |
+| Sıra | Fırsat | Skor | Sektör | Model | Tür | İlk Gelir Tahmini | Karar |
+|------|--------|------|--------|-------|-----|-------------------|-------|
+| 1 | ... | .../100 | ... | B2B/B2C | Quick Win/Büyük Bahis | $?K MRR @100 müşteri | 🟢 GO / 🟡 MAYBE / 🔴 SKIP |
 
 ---
 

@@ -1,11 +1,27 @@
 const axios = require('axios');
 
+const PH_QUERIES = [
+    "product hunt launch feedback",
+    "small business tool launch",
+    "SaaS for local business",
+    "booking system launch",
+    "invoicing tool small business",
+    "client portal launch",
+    "scheduling app small business",
+    "CRM alternative launch",
+    "property management tool",
+    "restaurant management launch",
+    "salon booking launch",
+    "freelancer tool launch"
+];
+
 async function scrapeProductHunt(limit = 15) {
     console.log(`[ProductHunt] En yeni ürünlerin tartışmaları aranıyor (API ile)...`);
     try {
         // Product Hunt doesn't have a public search API without auth,
-        // so we use their public RSS-like newest endpoint
-        const url = `https://hn.algolia.com/api/v1/search_by_date?query=product+hunt+launch+feedback&tags=story&hitsPerPage=${limit}`;
+        // so we use Hacker News Algolia search with rotating queries
+        const randomQuery = PH_QUERIES[Math.floor(Math.random() * PH_QUERIES.length)];
+        const url = `https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(randomQuery)}&tags=story&hitsPerPage=${limit}`;
         
         const response = await axios.get(url, { timeout: 10000 });
 
@@ -16,7 +32,7 @@ async function scrapeProductHunt(limit = 15) {
             const hit = hits[i];
             const title = hit.title || hit.story_title || '';
             if (title.trim()) {
-                posts.push(`[Source: HackerNews-ProductHunt | Query: product launch feedback]\nTitle: ${title}\n---\n`);
+                posts.push(`[Source: HackerNews-ProductHunt | Query: ${randomQuery}]\nTitle: ${title}\n---\n`);
             }
         }
         
